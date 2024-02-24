@@ -4,6 +4,8 @@ const AppError = require("./../utils/AppError");
 const catchAsync = require("./../utils/catchAsync");
 const { signJWTToken } = require("./../utils/jwt");
 const bcrypt = require("bcryptjs");
+const { compareEncryptedString } = require("../utils/encryption");
+const createVerificationTokenAndSendToEmail = require("./../utils/createVerificationToken");
 
 const signup = catchAsync(async (req, res, next) => {
   const { email, password, firstname, lastname, bio } = req.body;
@@ -24,6 +26,13 @@ const signup = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("Failed to create new user and", 404));
   }
+
+  const hashedVerificationToken = createVerificationTokenAndSendToEmail(
+    req,
+    user
+  );
+
+  await user.update({ verificationToken: hashedVerificationToken });
 
   const token = signJWTToken(user.id);
 
@@ -65,6 +74,79 @@ const login = catchAsync(async (req, res, next) => {
     data: {
       user,
     },
+  });
+});
+
+// Resend Verification email
+const resendEmailVerificationToken = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  // Check if user with email exist
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return next(
+      new AppError("User with the specified email address does not exist", 404)
+    );
+  }
+
+  if (user.emailVerified) {
+    return next(new AppError("User has already been verified", 404));
+  }
+
+  // Send the verification email to the user
+  const hashedVerificationToken = createVerificationTokenAndSendToEmail(
+    req,
+    user
+  );
+
+  // stored a hashed version of the token in the database
+  const updatedUser = await user.update({
+    verificationToken: hashedVerificationToken,
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Verification link has been resent to your email address",
+  });
+});
+
+// Verify User Email
+const verifyUserEmail = catchAsync(async (req, res, next) => {
+  const { email, verification_token } = req.params;
+  // Check if user with email exist
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return next(
+      new AppError("User with the specified email address does not exist", 404)
+    );
+  }
+
+  // Checks if the user is already verified
+  if (user.emailVerified) {
+    return next(new AppError("User has already been verified", 404));
+  }
+
+  // Checks if the verificationToken in the request params matches the encrypted on in the Db
+  if (
+    !(await compareEncryptedString(verification_token, user.verificationToken))
+  ) {
+    return next(new AppError("Invalid verification token", 404));
+  }
+
+  // Update the user's verification status
+  const verifiedUser = await user.update(
+    {
+      emailVerified: true,
+      verificationToken: null,
+    },
+    {
+      validateBeforeSave: false,
+    }
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: "User's email verified successfully",
+    user: verifiedUser,
   });
 });
 
@@ -156,4 +238,11 @@ const resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-module.exports = { signup, login, forgotPassword, resetPassword };
+module.exports = {
+  signup,
+  login,
+  verifyUserEmail,
+  resendEmailVerificationToken,
+  forgotPassword,
+  resetPassword,
+};
