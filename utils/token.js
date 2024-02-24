@@ -5,4 +5,8 @@ const createToken = (encryptionMethod) => {
   return token;
 };
 
-module.exports = { createToken };
+const hashToken = (token) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+module.exports = { createToken, hashToken };

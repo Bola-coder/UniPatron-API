@@ -1,6 +1,7 @@
 // models/User.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const { createToken, hashToken } = require("../utils/token");
 
 const User = sequelize.define(
   "User",
@@ -26,9 +27,16 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: "user",
     },
-
     bio: {
       type: DataTypes.STRING,
+    },
+    passwordResetToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    passwordResetTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {
@@ -41,5 +49,29 @@ const User = sequelize.define(
     },
   }
 );
+
+// Create an instance method
+User.prototype.getFullName = function () {
+  return `${this.firstname} ${this.lastname}`;
+};
+
+User.prototype.createPasswordResetToken = async function () {
+  const resetToken = createToken("hex");
+
+  this.passwordResetToken = hashToken(resetToken);
+
+  this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
+};
+
+User.prototype.isPasswordResetTokenValid = async function (token) {
+  const hashedToken = hashToken(token);
+
+  return (
+    this.passwordResetToken === hashedToken &&
+    this.passwordResetTokenExpires > Date.now()
+  );
+};
 
 module.exports = User;
