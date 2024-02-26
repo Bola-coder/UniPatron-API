@@ -11,4 +11,6 @@ router
   .patch(userController.updateUserProfile)
   .delete(userController.deleteUserProfile);
 
+router.route("/updatePassword").patch(userController.updatePassword);
+
 module.exports = router;
