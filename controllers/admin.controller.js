@@ -8,10 +8,16 @@ const createVerificationTokenAndSendToEmail = require("../utils/createVerificati
 
 // User Management Controller
 const getUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
+  const users = await User.findAll({ where: { role: "user" } });
+
+  if (!users) {
+    return next(new AppError("No users found", 404));
+  }
+
   res.status(200).json({
     status: "success",
     message: "Users retrieved successfully",
+    result: users.length,
     data: {
       users,
     },
@@ -31,10 +37,6 @@ const getUserById = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-// function createUser(req, res) {
-//   // Logic to create a new user
-// }
 
 const updateUser = catchAsync(async (req, res, next) => {
   const user = await User.findByPk(req.params.userID);
@@ -64,7 +66,7 @@ const deleteUser = catchAsync(async (req, res, next) => {
   }
 
   await user.destroy();
-  res.status(204).json({
+  res.status(200).json({
     status: "success",
     message: "User deleted successfully",
     data: null,
@@ -229,7 +231,6 @@ const login = catchAsync(async (req, res, next) => {
       admin,
     },
   });
-  //  TODO: complete implementing admin login
 });
 
 module.exports = {
