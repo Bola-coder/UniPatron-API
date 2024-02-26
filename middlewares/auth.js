@@ -49,4 +49,12 @@ const verifyIsAdmin = catchAsync(async (req, res, next) => {
   next();
 });
 
-module.exports = { protectRoutes, verifyIsAdmin };
+const isEmailVerified = catchAsync(async (req, res, next) => {
+  if (!req.user.emailVerified) {
+    return next(new AppError("Please verify your email address", 401));
+  }
+
+  next();
+});
+
+module.exports = { protectRoutes, verifyIsAdmin, isEmailVerified };

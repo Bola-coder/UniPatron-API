@@ -7,6 +7,7 @@ const AppError = require("./utils/AppError");
 const sequelize = require("./config/database");
 const authRoutes = require("./routes/auth.route");
 const adminRoutes = require("./routes/admin.route");
+const userRoutes = require("./routes/user.route");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.get("/api/v1/", (req, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/user", userRoutes);
 
 app.all("*", (req, res, next) => {
   const error = new AppError(
