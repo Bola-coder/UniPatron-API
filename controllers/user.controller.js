@@ -127,6 +127,7 @@ const updatePassword = catchAsync(async (req, res, next) => {
     data: { user: userResponse },
   });
 });
+
 module.exports = {
   getUserProfile,
   updateUserProfile,

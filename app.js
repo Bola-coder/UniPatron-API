@@ -8,6 +8,8 @@ const sequelize = require("./config/database");
 const authRoutes = require("./routes/auth.route");
 const adminRoutes = require("./routes/admin.route");
 const userRoutes = require("./routes/user.route");
+const companyRoutes = require("./routes/company.route");
+const jobRoutes = require("./routes/job.route");
 
 const app = express();
 
@@ -42,6 +44,8 @@ app.get("/api/v1/", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/company", companyRoutes);
+app.use("/api/v1/jobs", jobRoutes);
 
 app.all("*", (req, res, next) => {
   const error = new AppError(
