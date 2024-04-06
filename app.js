@@ -5,11 +5,13 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./middlewares/error");
 const AppError = require("./utils/AppError");
 const sequelize = require("./config/database");
+const { cloudinaryConfig } = require("./utils/cloudinary");
 const authRoutes = require("./routes/auth.route");
 const adminRoutes = require("./routes/admin.route");
 const userRoutes = require("./routes/user.route");
 const companyRoutes = require("./routes/company.route");
 const jobRoutes = require("./routes/job.route");
+const applicationRoutes = require("./routes/application.route");
 
 const app = express();
 
@@ -18,6 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors());
+app.use("*", cloudinaryConfig);
 
 async function syncDatabase() {
   try {
@@ -46,6 +49,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/jobs", jobRoutes);
+app.use("/api/v1/applications", applicationRoutes);
 
 app.all("*", (req, res, next) => {
   const error = new AppError(

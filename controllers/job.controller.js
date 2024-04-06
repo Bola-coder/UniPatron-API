@@ -41,7 +41,13 @@ const createJob = catchAsync(async (req, res, next) => {
       new AppError("Please supply company ID in request parameters", 400)
     );
   }
+
   const body = { ...req.body, CompanyId: parseInt(companyID, 10) };
+
+  if (!body) {
+    return next(new AppError("Please send request body!!", 404));
+  }
+
   console.log(body);
   const job = await Job.create(body);
   res.status(201).json({
@@ -78,16 +84,18 @@ const getJobsByCompany = catchAsync(async (req, res, next) => {
 const updateJobById = catchAsync(async (req, res, next) => {
   // const filteredBody = filterObj(req.body, "title", "description", "salary");
   const jobID = req.params.jobID;
-  const job = await Job.findByPk(req.params.id);
+  console.log(jobID);
+  const job = await Job.findByPk(jobID);
   if (!job) {
     return next(
       new AppError("Job with the specified ID not found not found", 404)
     );
   }
 
-  job.update(req.body);
+  await job.update(req.body);
   res.status(200).json({
     status: "success",
+    message: "Job details updated successfully",
     data: {
       job,
     },
@@ -96,12 +104,17 @@ const updateJobById = catchAsync(async (req, res, next) => {
 
 // Delete a job by ID
 const deleteJobById = catchAsync(async (req, res, next) => {
-  const job = await Job.findByIdAndDelete(req.params.id);
-  if (!job) {
-    return next(new AppError("Job not found", 404));
+  const jobID = req.params.jobID;
+  if (!jobID) {
+    return next(
+      new AppError("Please specify the ID of the job you want to delete", 404)
+    );
   }
-  res.status(204).json({
+  await Job.destroy({ where: { id: jobID } });
+
+  res.status(200).json({
     status: "success",
+    message: "Job deleted successfully!",
     data: null,
   });
 });

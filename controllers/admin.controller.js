@@ -195,7 +195,7 @@ const deleteAdmin = catchAsync(async (req, res, next) => {
   });
 });
 
-// Login Endpoint
+// Login Endpoint for adnin
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {

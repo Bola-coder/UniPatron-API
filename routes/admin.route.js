@@ -4,16 +4,17 @@ const authMiddleware = require("../middlewares/auth");
 const adminController = require("../controllers/admin.controller");
 
 // Routes
-router
-  .route("/")
-  //   .get(adminController.getAdmins)
-  .post(adminController.createAdmin);
 
 router.route("/login").post(adminController.login);
 
 // Middleware functions
 router.use(authMiddleware.protectRoutes);
 router.use(authMiddleware.verifyIsAdmin);
+
+router
+  .route("/")
+  //   .get(adminController.getAdmins)
+  .post(adminController.createAdmin);
 
 router.route("/users").get(adminController.getUsers);
 router
