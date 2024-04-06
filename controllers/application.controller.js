@@ -58,6 +58,37 @@ const createApplication = catchAsync(async (req, res, next) => {
   });
 });
 
+const reviewApplicatiom = catchAsync(async (req, res, next) => {
+  const { applicationID } = req.params;
+  const { status } = req.body;
+
+  const application = await Application.findByPk(applicationID);
+
+  if (!application) {
+    return next(
+      new AppError("Application with the specified ID not found", 404)
+    );
+  }
+
+  application.status = status;
+  await application.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      application,
+    },
+  });
+});
+
+// TODO:
+// Review Application
+// Schedule Interview
+// Reject Application
+// Accept Application
+// Notification System
+// Feedback System
+
 module.exports = {
   createApplication,
 };

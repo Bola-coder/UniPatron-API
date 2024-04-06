@@ -1,4 +1,6 @@
 const nodemailer = require("nodemailer");
+const hbs = require("nodemailer-express-handlebars");
+const path = require("path");
 
 // const EMAIL_HOST = process.env.EMAIL_HOST;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
@@ -16,12 +18,24 @@ const sendEmail = async (options) => {
     },
   });
 
+  // configure handlebars options
+  const handlebarOptions = {
+    viewEngine: {
+      partialsDir: path.resolve("./views/"),
+      defaultLayout: false,
+    },
+    viewPath: path.resolve("./views/"),
+  };
+
+  transporter.use("compile", hbs(handlebarOptions));
+
   //   Configure mail options
   const mailOptions = {
     from: "Bolarinwa Ahmed <bolarinwaahmed22@gmail.com>",
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    template: "email",
+    context: options.context,
   };
 
   await transporter.sendMail(mailOptions);

@@ -5,7 +5,13 @@ const User = require("./user.model");
 
 const Application = sequelize.define("Application", {
   status: {
-    type: DataTypes.ENUM("pending", "rejected", "accepted"),
+    type: DataTypes.ENUM(
+      "pending",
+      "reviewing",
+      "interviewing",
+      "rejected",
+      "accepted"
+    ),
     defaultValue: "pending",
   },
   resume: {

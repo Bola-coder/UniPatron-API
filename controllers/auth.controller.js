@@ -27,7 +27,7 @@ const signup = catchAsync(async (req, res, next) => {
     return next(new AppError("Failed to create new user and", 404));
   }
 
-  const hashedVerificationToken = createVerificationTokenAndSendToEmail(
+  const hashedVerificationToken = await createVerificationTokenAndSendToEmail(
     req,
     user
   );
@@ -170,11 +170,18 @@ const forgotPassword = catchAsync(async (req, res, next) => {
     "host"
   )}/api/v1/auth/reset-password/${user.email}/${resetToken}`;
 
+  const message = `Click the link below to reset your password: \n\n ${resetPasswordLink}`;
+  const title = "Reset Password Link";
+  const name = `${user?.firstname}  ${user?.lastname}`;
+  const document_title = "Unipatron";
+  const context = { message, title, name, document_title };
+
   const mailOptions = {
     email: user.email,
     subject: "Your password reset token (valid for 10 minutes)",
-    message: `>Click the link below to reset your password: \n\n ${resetPasswordLink}`,
+    context,
   };
+
   await sendEmail(mailOptions);
 
   res.status(200).json({

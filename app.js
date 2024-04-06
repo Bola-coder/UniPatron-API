@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middlewares/error");
@@ -14,7 +15,6 @@ const jobRoutes = require("./routes/job.route");
 const applicationRoutes = require("./routes/application.route");
 
 const app = express();
-
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
