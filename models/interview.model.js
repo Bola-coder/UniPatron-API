@@ -22,7 +22,7 @@ const Interview = sequelize.define("Interview", {
   },
 });
 
-Application.hasOne(Interview, {
+Application.hasMany(Interview, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });

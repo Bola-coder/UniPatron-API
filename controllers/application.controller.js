@@ -101,7 +101,7 @@ const reviewApplicatiom = catchAsync(async (req, res, next) => {
   }
 
   application.status = status;
-  await application.update();
+  await application.update({ status });
 
   const message = `Your application for the job ${application.Job.name} has now moved to status: ${status}`;
   const name = application.User.getFullName();
@@ -127,8 +127,6 @@ const reviewApplicatiom = catchAsync(async (req, res, next) => {
 });
 
 // TODO:
-// Review Application - DONE
-// Schedule Interview -DONE
 // Reject Application
 // Accept Application
 // Notification and Reminder System
