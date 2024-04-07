@@ -5,7 +5,7 @@ const User = require("./user.model");
 
 const Interview = sequelize.define("Interview", {
   date: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   time: {

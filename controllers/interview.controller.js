@@ -9,7 +9,15 @@ const { Op } = require("sequelize");
 const scheduleInterview = catchAsync(async (req, res, next) => {
   const { applicationID } = req.params;
   const { date, time, link } = req.body;
+  let formattedDate;
+  try {
+    formattedDate = new Date(date);
+  } catch (error) {
+    return next(new AppError("Invalid date format", 400));
+  }
 
+  // Ensure the date is stored in the database in YYYY-MM-DD format
+  const databaseFormattedDate = formattedDate.toISOString().split("T")[0];
   if (!date || !time || !link) {
     return next(
       new AppError("Please provide date, time and link for the interview", 400)
@@ -41,7 +49,7 @@ const scheduleInterview = catchAsync(async (req, res, next) => {
   }
 
   const interview = await Interview.create({
-    date,
+    date: databaseFormattedDate,
     time,
     link,
     ApplicationId: applicationID,
@@ -136,6 +144,16 @@ const updateInterview = catchAsync(async (req, res, next) => {
   const { date: currentDate, time: currentTime, link: currentLink } = interview;
 
   const { date, time, link } = req.body;
+  let formattedDate;
+  try {
+    date ? (formattedDate = new Date(date)) : null;
+  } catch (error) {
+    return next(new AppError("Invalid date format", 400));
+  }
+
+  // Ensure the date is stored in the database in YYYY-MM-DD format
+  const databaseFormattedDate =
+    formattedDate && formattedDate.toISOString().split("T")[0];
 
   if (!Object.keys(req.body).length) {
     return next(
@@ -146,11 +164,11 @@ const updateInterview = catchAsync(async (req, res, next) => {
     );
   }
 
-  date && (interview.date = date);
+  date && (interview.date = databaseFormattedDate);
   time && (interview.time = time);
   link && (interview.link = link);
 
-  await interview.update({ date, time, link });
+  await interview.update({ date: databaseFormattedDate, time, link });
 
   //  Send mail to the applicant to inform them of the interview update
   const message = `The interview for the job ${interview.Application.Job.name} scheduled for ${currentDate} at ${currentTime} using link ${currentLink} has been updated. The interview will now be held on ${interview.date} by ${interview.time} using: ${interview.link}`;

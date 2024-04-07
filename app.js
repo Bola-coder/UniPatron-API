@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const cron = require("node-cron");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middlewares/error");
@@ -14,6 +14,7 @@ const companyRoutes = require("./routes/company.route");
 const jobRoutes = require("./routes/job.route");
 const applicationRoutes = require("./routes/application.route");
 const interviewRoutes = require("./routes/interview.route");
+const sendInverviewReminder = require("./cron-jobs/sendInterviewReminder");
 
 const app = express();
 app.use(morgan("dev"));
@@ -33,6 +34,12 @@ async function syncDatabase() {
 }
 
 syncDatabase();
+
+// Cron Jobs
+// Send Interview reminders
+cron.schedule("* 7 * * *", async () => {
+  await sendInverviewReminder();
+});
 
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to UniPatrons!");
