@@ -7,7 +7,7 @@ const Application = sequelize.define("Application", {
   status: {
     type: DataTypes.ENUM(
       "pending",
-      "reviewing",
+      "review",
       "interviewing",
       "rejected",
       "accepted"

@@ -13,6 +13,7 @@ const userRoutes = require("./routes/user.route");
 const companyRoutes = require("./routes/company.route");
 const jobRoutes = require("./routes/job.route");
 const applicationRoutes = require("./routes/application.route");
+const interviewRoutes = require("./routes/interview.route");
 
 const app = express();
 app.use(morgan("dev"));
@@ -50,6 +51,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/applications", applicationRoutes);
+app.use("/api/v1/interviews", interviewRoutes);
 
 app.all("*", (req, res, next) => {
   const error = new AppError(
