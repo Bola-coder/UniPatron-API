@@ -20,4 +20,11 @@ router
   .route("/:interviewID/cancel")
   .patch(authMiddleware.verifyIsAdmin, interviewController.cancelInterview);
 
+router
+  .route("/:interviewID/complete")
+  .patch(
+    authMiddleware.verifyIsAdmin,
+    interviewController.markInterviewAsComplete
+  );
+
 module.exports = router;

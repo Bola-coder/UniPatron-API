@@ -16,7 +16,21 @@ router
   );
 
 router
+  .route("/application/:applicationID")
+  .get(applicationController.getApplicationDetails);
+
+router
   .route("/:applicationID/review")
   .patch(authMiddleware.verifyIsAdmin, applicationController.reviewApplicatiom);
+
+router
+  .route("/:applicationID/reject")
+  .patch(authMiddleware.verifyIsAdmin, applicationController.rejectApplication);
+
+router
+  .route("/:applicationID/accept")
+  .patch(authMiddleware.verifyIsAdmin, applicationController.acceptApplication);
+
+router.route("/user/all").get(applicationController.getApplications);
 
 module.exports = router;

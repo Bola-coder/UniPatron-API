@@ -258,10 +258,45 @@ const getInterviewDetails = catchAsync(async (req, res, next) => {
   });
 });
 
+// Admin
+const markInterviewAsComplete = catchAsync(async (req, res, next) => {
+  const { interviewID } = req.params;
+  const interview = await Interview.findByPk(interviewID, {
+    include: {
+      model: Application,
+      include: ["User", "Job"],
+    },
+  });
+
+  if (!interview) {
+    return next(new AppError("Interview with the specified ID not found", 404));
+  }
+
+  if (interview.status === "cancelled") {
+    return next(
+      new AppError("You can't mark a cancelled interview as completed", 404)
+    );
+  }
+
+  interview.status = "completed";
+
+  await interview.update({ status: "completed" });
+  // await interview.Application.update({ status: "completed" });
+
+  res.status(200).json({
+    status: "success",
+    message: "Interview marked as completed successfully",
+    data: {
+      interview,
+    },
+  });
+});
+
 module.exports = {
   scheduleInterview,
   cancelInterview,
   updateInterview,
   getAllInterviews,
   getInterviewDetails,
+  markInterviewAsComplete,
 };

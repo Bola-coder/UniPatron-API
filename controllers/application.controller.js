@@ -126,14 +126,141 @@ const reviewApplicatiom = catchAsync(async (req, res, next) => {
   });
 });
 
-// TODO:
-// Reject Application
-// Accept Application
-// Notification and Reminder System
-// Feedback System
+const rejectApplication = catchAsync(async (req, res, next) => {
+  const { applicationID } = req.params;
+
+  if (!applicationID) {
+    return next(new AppError("Please provide the application ID", 400));
+  }
+
+  const application = await Application.findByPk(applicationID, {
+    include: ["User", "Job"],
+  });
+
+  if (!application) {
+    return next(
+      new AppError("Application with the specified ID not found", 404)
+    );
+  }
+
+  // Update application status to rejected
+  application.status = "rejected";
+  application.update({ status: "rejected" });
+
+  // Send a mail to the user about the rejection
+  const message = `We are sorry to inform you that your application for the job ${application.Job.name} has been rejected`;
+  const name = application.User.getFullName();
+  const template = "application-status";
+
+  const context = { message, name };
+  await sendEmail({
+    email: application.User.email,
+    subject: "Application Rejected",
+    template,
+    context,
+  });
+
+  res.status(200).json({
+    status: "success",
+    messsgae: "Application rejected successfully",
+    data: {
+      application,
+    },
+  });
+});
+
+const acceptApplication = catchAsync(async (req, res, next) => {
+  const { applicationID } = req.params;
+
+  if (!applicationID) {
+    return next(new AppError("Please provide the application ID", 400));
+  }
+
+  const application = await Application.findByPk(applicationID, {
+    include: ["User", "Job"],
+  });
+
+  if (!application) {
+    return next(
+      new AppError("Application with the specified ID not found", 404)
+    );
+  }
+
+  // Update application status to rejected
+  application.status = "accepted";
+  application.update({ status: "accepted" });
+
+  // Send a mail to the user about the rejection
+  const message = `We are pleased to inform you that your application for the job ${application.Job.name} has been accepted. You will be contacted with more information by the admin soon`;
+  const name = application.User.getFullName();
+  const template = "application-status";
+
+  const context = { message, name };
+  await sendEmail({
+    email: application.User.email,
+    subject: "Application Accepted",
+    template,
+    context,
+  });
+
+  res.status(200).json({
+    status: "success",
+    messsgae: "Application accepted successfully",
+    data: {
+      application,
+    },
+  });
+});
+
+// User
+const getApplications = catchAsync(async (req, res, next) => {
+  const applications = await Application.findAll({
+    where: { UserId: req.user.id },
+    include: "User",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "All applications for the user gotten successfullt",
+    results: applications.length,
+    data: {
+      applications,
+    },
+  });
+});
+
+const getApplicationDetails = catchAsync(async (req, res, next) => {
+  const { applicationID } = req.params;
+  let application = {};
+  if (req.user.role === "user") {
+    application = await Application.findOne({
+      where: { UserId: req.user.id, id: applicationID },
+      include: "User",
+    });
+  } else if (req.user.role === "admin") {
+    application = await Application.findOne({
+      where: { id: applicationID },
+      include: "User",
+    });
+  } else {
+    return;
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Application details gotten successfully",
+    data: {
+      application,
+    },
+  });
+});
 
 module.exports = {
   createApplication,
   getAllApplicationsToAJob,
   reviewApplicatiom,
+  rejectApplication,
+  acceptApplication,
+  getApplications,
+  getApplicationDetails,
 };
